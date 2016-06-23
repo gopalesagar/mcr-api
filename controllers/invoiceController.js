@@ -33,7 +33,7 @@ function InvoiceController() {
     this.save = function(req, res, next) {
         const tag = 'INVOICE SAVE: '
     	res.setHeader('Content-Type', 'application/json')
-    	var customer = db.collection(collection.customers)
+    	var customers = db.collection(collection.customers)
         var invoices = db.collection(collection.invoices)
 
         var customerId = req.body.customerId
