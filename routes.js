@@ -4,7 +4,7 @@ module.exports = function(app) {
     var customer = require('./controllers/customerController');
 
     //USER MODULE
-    app.post('/', function(req, res, next) {
+    app.get('/', function(req, res, next) {
         res.send(200, 'Welcome to MCR API')
     });
     app.post('/v1/users', user.save);
