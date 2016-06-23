@@ -67,9 +67,9 @@ function InvoiceController() {
                     customer: customer,
                     invoiceDetails: invoiceDetails,
                     invoiceAmount: invoiceAmount,
-                    invoiceDate: invoiceDate,
+                    invoiceDate: new Date(invoiceDate),
                     status: status.active,
-                    payableDate: payableDate,
+                    payableDate: new Date(payableDate),
                     createdAt: new Date(),
                     updatedAt: new Date()
                 }
