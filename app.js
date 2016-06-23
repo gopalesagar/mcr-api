@@ -47,7 +47,9 @@ app.use(restify.bodyParser());
 app.use(restify.queryParser());
 app.use(restify.fullResponse());
 
-app.listen(config.app.port, function() {
+var port = process.env.PORT || config.app.port;
+
+app.listen(port, function() {
 	log.i('MCR NodeJs server running on port ' + config.app.port);
 });
 

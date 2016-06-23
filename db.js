@@ -8,12 +8,11 @@ var exports = {};
 var MongoClient = mongodb.MongoClient;
 
 if(MongoClient) {
-	MongoClient.connect(config.db.connectionString, config.db.options, function(error, db) {
+	MongoClient.connect(process.env.MONGODB_URI, config.db.options, function(error, db) {
 		if(error) {
 			log.e(__filename + JSON.stringify(error));
 		} else {
 			log.i('Database initialized!')
-			db.collection('users')
 			GLOBAL.db = db;
 		}
 	})

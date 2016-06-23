@@ -7,6 +7,7 @@ module.exports = function(app) {
     app.get('/', function(req, res, next) {
         res.send(200, 'Welcome to MCR API')
     });
+    
     app.post('/v1/users', user.save);
     app.post('/v1/auth', auth.authenticate);
     app.post('/v1/customer', customer.save);
