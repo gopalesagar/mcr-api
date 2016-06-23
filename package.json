@@ -1,0 +1,16 @@
+{
+  "name": "mcr-api",
+  "version": "0.1.0",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "crypto": "0.0.3",
+    "iz": "^0.7.1",
+    "mongodb": "*",
+    "morgan": "^1.7.0",
+    "randomstring": "^1.1.5",
+    "restify": "*",
+    "winston": "^2.2.0"
+  }
+}

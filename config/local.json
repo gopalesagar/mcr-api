@@ -1,0 +1,20 @@
+{
+	"db": {
+		"database": "mcr",
+        "connectionString":"mongodb://mcradmin:mcr2016admin@127.0.0.1:27017/mcr",
+        "cred": "mcradmin:mcr2016admin",
+        "server": "localhost",
+        "options": {
+            "server": {
+                "auto_reconnect": true,
+                "poolSize" : 40,
+                "socketOptions" : {
+                    "connectTimeoutMS": 500
+                }
+            }
+        }
+	},
+	"app": {
+		"port":3000
+	}
+}

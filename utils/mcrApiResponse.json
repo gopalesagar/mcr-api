@@ -1,0 +1,29 @@
+{
+    "saveSuccess": {
+        "code": 200,
+        "message": "Resource saved succesfully!"
+    },
+    "unauthorized": {
+        "code": 401,
+        "message": "Unauthorized!"
+    },
+    "preconditionFailed": {
+        "code": 400,
+        "message": "Preconditioned failed!"
+    },
+    "internalServerError": {
+        "code": 500,
+        "message": "Internal server error!"
+    },
+    "unknownError": {
+        "code": 100,
+        "message": "Unknown error!"
+    },
+    "invalidLogin": {
+        "code": 400,
+        "message": "Invalid username or password!"
+    },
+    "validation": {
+        
+    }
+}
