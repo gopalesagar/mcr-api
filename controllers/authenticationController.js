@@ -44,7 +44,13 @@ function AuthenticationController() {
                 var selector = {
                     username: username
                 }
-                users.find(selector).limit(1).toArray(function(error, _users) {
+				var projection = {
+					username: true,
+					status: true,
+					createdAt: true,
+					updatedAt: true
+				}
+                users.find(selector, projection).limit(1).toArray(function(error, _users) {
                     if(error) {
                         log.e(tag + 'Error fetching user');
                         callback(mResponse.internalServerError, null)
