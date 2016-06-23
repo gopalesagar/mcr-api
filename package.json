@@ -4,6 +4,9 @@
   "scripts": {
     "start": "node app.js"
   },
+  "engines": {
+    "node": "4.3.1"
+  },
   "dependencies": {
     "async": "^2.0.0-rc.6",
     "crypto": "0.0.3",
