@@ -12,7 +12,9 @@ if(MongoClient) {
 		if(error) {
 			log.e(__filename + JSON.stringify(error));
 		} else {
-			exports.db = db;
+			log.i('Database initialized!')
+			db.collection('users')
+			GLOBAL.db = db;
 		}
 	})
 }

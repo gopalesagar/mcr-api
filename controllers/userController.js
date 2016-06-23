@@ -1,5 +1,5 @@
-var db = require('../db');
-var crypto = require('crypto');
+var crypto = require('crypto')
+var async = require('async')
 
 var updateOptions = {
 	new: true,
