@@ -71,7 +71,7 @@ function AuthenticationController() {
                     callback(mResponse.invalidLogin, null)
                 }
             }
-        ], function(error, user) {
+        ], function(user, error) {
             if(error) {
                 log.e(tag + 'Error authenticating user final block');
                 res.send(error.code, error);
