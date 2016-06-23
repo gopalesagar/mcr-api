@@ -33,7 +33,7 @@ function CustomerController() {
     this.save = function(req, res, next) {
         const tag = 'CUSTOMER SAVE: '
     	res.setHeader('Content-Type', 'application/json')
-    	var customer = db.collection(collection.customers)
+    	var customers = db.collection(collection.customers)
 
         var companyName = req.body.companyName
         var contactName = req.body.contactName
