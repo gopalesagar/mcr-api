@@ -27,11 +27,11 @@ function decrypt(text){
 }
 
 //THIS CONTROLLER HANDLES ALL THE FUNCTIONALITIES RELATED TO USER
-function UserController() {
+function AuthenticationController() {
 
     //REGISTERS A USER IN MULTPLYR
-    this.save = function(req, res, next) {
-        const tag = 'USER SAVE: '
+    this.authenticate = function(req, res, next) {
+        const tag = 'AUTHENTICATE: '
     	res.setHeader('Content-Type', 'application/json')
     	var users = db.collection(collection.users)
 
@@ -50,41 +50,37 @@ function UserController() {
                         callback(mResponse.internalServerError, null)
                     } else {
                         if(_users && _users[0]) {
-                            callback(mResponse.duplicateUsername, null)
+                            callback(_users[0], null)
                         } else {
-                            callback(null, null)
+                            callback(mResponse.invalidLogin, null)
                         }
                     }
                 })
             },
             function(user, callback) {
-                var user = {
-                    username: username,
-                    password: encrypt(password),
-                    status: status.active,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
+                var decryptedPassword = decrypt(hashedPassword)
+                if(password === decryptedPassword) {
+                    callback(null, user)
+                } else {
+                    callback(mResponse.invalidLogin, null)
                 }
-
-                users.insert(user, insertOptions, function(error, response) {
-                    if(error) {
-                        log.e(tag + 'Error inserting user');
-                        callback(mResponse.internalServerError, null)
-                    } else {
-                        callback(null, user)
-                    }
-                })
             }
         ], function(error, user) {
             if(error) {
-                log.e(tag + 'Error inserting user final block');
+                log.e(tag + 'Error authenticating user final block');
                 res.send(error.code, error);
             } else {
-                res.send(mResponse.saveSuccess.code, mResponse.saveSuccess);
+                var response = {
+                    code: mResponse.saveSuccess.code,
+                    body: mResponse.saveSuccess,
+                    user: user
+                }
+                res.send(response.code, response);
             }
         })
     };
+    
     return this;
 };
 
-module.exports = new UserController();
+module.exports = new AuthenticationController();

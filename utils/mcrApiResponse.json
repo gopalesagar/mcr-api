@@ -23,7 +23,11 @@
         "code": 400,
         "message": "Invalid username or password!"
     },
+    "duplicateUsername": {
+        "code": 400,
+        "message": "The username has already been taken!"
+    },
     "validation": {
-        
+
     }
 }

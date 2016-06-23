@@ -1,0 +1,5 @@
+{
+    "pending": "PENDING",
+    "active": "ACTIVE",
+    "disabled": "DISABLED"
+}

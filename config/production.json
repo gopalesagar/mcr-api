@@ -1,7 +1,7 @@
 {
 	"db": {
 		"database": "mcr",
-        "connectionString":"mongodb://mcradmin:mcr2016admin@127.0.0.1:27017/mcr",
+        "connectionString":"mongodb://mcradmin:mcr2016admin@127.0.0.1:27017/heroku_3fbbwktz",
         "cred": "mcradmin:mcr2016admin",
         "server": "localhost",
         "options": {

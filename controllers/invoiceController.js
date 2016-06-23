@@ -27,64 +27,73 @@ function decrypt(text){
 }
 
 //THIS CONTROLLER HANDLES ALL THE FUNCTIONALITIES RELATED TO USER
-function UserController() {
+function InvoiceController() {
 
     //REGISTERS A USER IN MULTPLYR
     this.save = function(req, res, next) {
-        const tag = 'USER SAVE: '
+        const tag = 'INVOICE SAVE: '
     	res.setHeader('Content-Type', 'application/json')
-    	var users = db.collection(collection.users)
+    	var customer = db.collection(collection.customers)
+        var invoices = db.collection(collection.invoices)
 
-        var username = req.body.username
-        var password = req.body.password
+        var customerId = req.body.customerId
+        var invoiceDetails = req.body.invoiceDetails
+        var invoiceAmount = req.body.invoiceAmount
+        var invoiceDate = req.body.invoiceDate
+        var status = req.body.status
+        var payableDate = req.body.payableDate
 
         async.waterfall([
             function(callback) {
-                //FIND ANY EXISTING USER HERE
+                //FIND CUSTOMER HERE
                 var selector = {
-                    username: username
+                    _id: new ObjectId(customerId)
                 }
-                users.find(selector).limit(1).toArray(function(error, _users) {
+                customers.find(selector).limit(1).toArray(function(error, _customers) {
                     if(error) {
-                        log.e(tag + 'Error fetching user');
+                        log.e(tag + 'Error finding customer');
                         callback(mResponse.internalServerError, null)
                     } else {
-                        if(_users && _users[0]) {
-                            callback(mResponse.duplicateUsername, null)
+                        if(_customers && _customers[0]) {
+                            callback(null, _customers[0])
                         } else {
-                            callback(null, null)
+                            callback(mResponse.notFound, null)
                         }
                     }
                 })
             },
-            function(user, callback) {
-                var user = {
-                    username: username,
-                    password: encrypt(password),
+            function(customer, callback) {
+                var invoice = {
+                    customer: customer,
+                    invoiceDetails: invoiceDetails,
+                    invoiceAmount: invoiceAmount,
+                    invoiceDate: invoiceDate,
                     status: status.active,
+                    payableDate: payableDate,
                     createdAt: new Date(),
                     updatedAt: new Date()
                 }
 
-                users.insert(user, insertOptions, function(error, response) {
+                invoices.insert(invoice, insertOptions, function(error, response) {
                     if(error) {
-                        log.e(tag + 'Error inserting user');
+                        log.e(tag + 'Error inserting invoice');
                         callback(mResponse.internalServerError, null)
                     } else {
-                        callback(null, user)
+                        callback(null, invoice)
                     }
                 })
             }
-        ], function(error, user) {
+        ], function(error, invoice) {
             if(error) {
-                log.e(tag + 'Error inserting user final block');
+                log.e(tag + 'Error inserting invoice final block');
                 res.send(error.code, error);
             } else {
                 res.send(mResponse.saveSuccess.code, mResponse.saveSuccess);
             }
         })
     };
+    
     return this;
 };
 
-module.exports = new UserController();
+module.exports = new InvoiceController();

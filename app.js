@@ -4,6 +4,9 @@ var path = require('path');
 var restify = require('restify');
 config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config/' + ENV + '.json')));
 mResponse = JSON.parse(fs.readFileSync(path.join(__dirname, 'utils/mcrApiResponse.json')));
+collection = JSON.parse(fs.readFileSync(path.join(__dirname, 'utils/collections.json')));
+status = JSON.parse(fs.readFileSync(path.join(__dirname, 'utils/status.json')));
+ObjectId = require('mongodb').ObjectID
 
 //REQUIRED TO LOG ACCESS LOGS TO FILE
 var accessLogStream = fs.createWriteStream(path.join(__dirname, 'accessLogs/' + ENV + '/access.log'), {flags: 'a'})
