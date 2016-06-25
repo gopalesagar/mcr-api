@@ -1,5 +1,6 @@
 var crypto = require('crypto')
 var async = require('async')
+var jwt = require('jsonwebtoken')
 
 var updateOptions = {
 	new: true,
@@ -42,55 +43,63 @@ function InvoiceController() {
         var invoiceDate = req.body.invoiceDate
         var status = req.body.status
         var payableDate = req.body.payableDate
+        var token = req.headers.token
 
-        async.waterfall([
-            function(callback) {
-                //FIND CUSTOMER HERE
-                var selector = {
-                    _id: new ObjectId(customerId)
-                }
-                customers.find(selector).limit(1).toArray(function(error, _customers) {
-                    if(error) {
-                        log.e(tag + 'Error finding customer');
-                        callback(mResponse.internalServerError, null)
-                    } else {
-                        if(_customers && _customers[0]) {
-                            callback(null, _customers[0])
-                        } else {
-                            callback(mResponse.notFound, null)
-                        }
-                    }
-                })
-            },
-            function(customer, callback) {
-                var invoice = {
-                    customer: customer,
-                    invoiceDetails: invoiceDetails,
-                    invoiceAmount: invoiceAmount,
-                    invoiceDate: new Date(invoiceDate),
-                    status: status.active,
-                    payableDate: new Date(payableDate),
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                }
-
-                invoices.insert(invoice, insertOptions, function(error, response) {
-                    if(error) {
-                        log.e(tag + 'Error inserting invoice');
-                        callback(mResponse.internalServerError, null)
-                    } else {
-                        callback(null, invoice)
-                    }
-                })
-            }
-        ], function(error, invoice) {
+        jwt.verify(token, config.authentication.superSecret, function(error, user) {
             if(error) {
-                log.e(tag + 'Error inserting invoice final block');
-                res.send(error.code, error);
+                log.e(tag + JSON.stringify(error))
+                res.send(mResponse.unauthorized.code, mResponse.unauthorized);
             } else {
-                res.send(mResponse.saveSuccess.code, mResponse.saveSuccess);
+                async.waterfall([
+                    function(callback) {
+                        //FIND CUSTOMER HERE
+                        var selector = {
+                            _id: new ObjectId(customerId)
+                        }
+                        customers.find(selector).limit(1).toArray(function(error, _customers) {
+                            if(error) {
+                                log.e(tag + 'Error finding customer');
+                                callback(mResponse.internalServerError, null)
+                            } else {
+                                if(_customers && _customers[0]) {
+                                    callback(null, _customers[0])
+                                } else {
+                                    callback(mResponse.notFound, null)
+                                }
+                            }
+                        })
+                    },
+                    function(customer, callback) {
+                        var invoice = {
+                            customer: customer,
+                            invoiceDetails: invoiceDetails,
+                            invoiceAmount: invoiceAmount,
+                            invoiceDate: new Date(invoiceDate),
+                            status: status.active,
+                            payableDate: new Date(payableDate),
+                            createdAt: new Date(),
+                            updatedAt: new Date()
+                        }
+
+                        invoices.insert(invoice, insertOptions, function(error, response) {
+                            if(error) {
+                                log.e(tag + 'Error inserting invoice');
+                                callback(mResponse.internalServerError, null)
+                            } else {
+                                callback(null, invoice)
+                            }
+                        })
+                    }
+                ], function(error, invoice) {
+                    if(error) {
+                        log.e(tag + 'Error inserting invoice final block');
+                        res.send(error.code, error);
+                    } else {
+                        res.send(mResponse.saveSuccess.code, mResponse.saveSuccess);
+                    }
+                });
             }
-        })
+        });
     };
 
     this.list = function(req, res, next) {
@@ -100,37 +109,45 @@ function InvoiceController() {
 
         var skipCount = req.query.skipCount ? parseInt(req.query.skipCount) : 0
         var limit = req.query.limit ? parseInt(req.query.limit) : 0
+        var token = req.headers.token
 
-        async.waterfall([
-            function(callback) {
-                //FIND INVOICES HERE
-                var selector = {}
-                invoices.find(selector).limit(limit).skip(skipCount).toArray(function(error, _invoices) {
-                    if(error) {
-                        log.e(tag + 'Error fetching invoices');
-                        callback(mResponse.internalServerError, null)
-                    } else {
-                        if(_invoices && _invoices.length > 0) {
-                            callback(null, _invoices)
-                        } else {
-                            callback(null, [])
-                        }
-                    }
-                })
-            }
-        ], function(error, _invoices) {
+        jwt.verify(token, config.authentication.superSecret, function(error, user) {
             if(error) {
-                log.e(tag + 'Error fetching invoices final block');
-                res.send(error.code, error);
+                log.e(tag + JSON.stringify(error))
+                res.send(mResponse.unauthorized.code, mResponse.unauthorized);
             } else {
-                var response = {
-                    users: _invoices,
-                    code: mResponse.querySuccess.code,
-                    message: mResponse.querySuccess.message
-                }
-                res.send(200, _invoices);
+                async.waterfall([
+                    function(callback) {
+                        //FIND INVOICES HERE
+                        var selector = {}
+                        invoices.find(selector).limit(limit).skip(skipCount).toArray(function(error, _invoices) {
+                            if(error) {
+                                log.e(tag + 'Error fetching invoices');
+                                callback(mResponse.internalServerError, null)
+                            } else {
+                                if(_invoices && _invoices.length > 0) {
+                                    callback(null, _invoices)
+                                } else {
+                                    callback(null, [])
+                                }
+                            }
+                        })
+                    }
+                ], function(error, _invoices) {
+                    if(error) {
+                        log.e(tag + 'Error fetching invoices final block');
+                        res.send(error.code, error);
+                    } else {
+                        var response = {
+                            users: _invoices,
+                            code: mResponse.querySuccess.code,
+                            message: mResponse.querySuccess.message
+                        }
+                        res.send(200, _invoices);
+                    }
+                });
             }
-        })
+        });
     };
 
     return this;

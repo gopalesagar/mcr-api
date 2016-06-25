@@ -1,5 +1,6 @@
 var crypto = require('crypto')
 var async = require('async')
+var jwt = require('jsonwebtoken')
 
 var updateOptions = {
 	new: true,
@@ -76,10 +77,12 @@ function AuthenticationController() {
                 log.e(tag + 'Error authenticating user final block');
                 res.send(error.code, error);
             } else {
+                var token = jwt.sign(user, config.authentication.superSecret, {
+                    expiresIn: 43200 // expires in 30 days
+                });
                 var response = {
                     code: mResponse.saveSuccess.code,
-                    body: mResponse.saveSuccess,
-                    user: user
+                    token: token
                 }
                 res.send(response.code, response);
             }

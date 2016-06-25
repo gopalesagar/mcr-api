@@ -1,5 +1,6 @@
 var crypto = require('crypto')
 var async = require('async')
+var jwt = require('jsonwebtoken')
 
 var updateOptions = {
 	new: true,
@@ -32,12 +33,12 @@ function UserController() {
     //REGISTERS A USER IN MULTPLYR
     this.save = function(req, res, next) {
         const tag = 'USER SAVE: '
-    	res.setHeader('Content-Type', 'application/json')
-    	var users = db.collection(collection.users)
-
+        res.setHeader('Content-Type', 'application/json')
+        var users = db.collection(collection.users)
+        
         var username = req.body.username
         var password = req.body.password
-
+        
         async.waterfall([
             function(callback) {
                 //FIND ANY EXISTING USER HERE
@@ -89,38 +90,45 @@ function UserController() {
         const tag = 'USER GET: '
         res.setHeader('Content-Type', 'application/json')
         var users = db.collection(collection.users)
-
+        var token = req.headers.token
         var skipCount = req.query.skipCount ? parseInt(req.query.skipCount) : 0
         var limit = req.query.limit ? parseInt(req.query.limit) : 0
 
-        async.waterfall([
-            function(callback) {
-                //FIND USERS HERE
-                var selector = {}
-                users.find(selector).limit(limit).skip(skipCount).toArray(function(error, _users) {
+        jwt.verify(token, config.authentication.superSecret, function(error, user) {
+            if(error) {
+                log.e(tag + JSON.stringify(error))
+                res.send(mResponse.unauthorized.code, mResponse.unauthorized);
+            } else {
+                async.waterfall([
+                    function(callback) {
+                        //FIND USERS HERE
+                        var selector = {}
+                        users.find(selector).limit(limit).skip(skipCount).toArray(function(error, _users) {
+                            if(error) {
+                                log.e(tag + 'Error fetching user');
+                                callback(mResponse.internalServerError, null)
+                            } else {
+                                if(_users && _users.length > 0) {
+                                    callback(null, _users)
+                                } else {
+                                    callback(null, [])
+                                }
+                            }
+                        })
+                    }
+                ], function(error, _users) {
                     if(error) {
-                        log.e(tag + 'Error fetching user');
-                        callback(mResponse.internalServerError, null)
+                        log.e(tag + 'Error fetching users final block');
+                        res.send(error.code, error);
                     } else {
-                        if(_users && _users.length > 0) {
-                            callback(null, _users)
-                        } else {
-                            callback(null, [])
-                        }
+                        // var response = {
+                        //     users: _users,
+                        //     code: mResponse.querySuccess.code,
+                        //     message: mResponse.querySuccess.message
+                        // }
+                        res.send(200, _users);
                     }
                 })
-            }
-        ], function(error, _users) {
-            if(error) {
-                log.e(tag + 'Error fetching users final block');
-                res.send(error.code, error);
-            } else {
-                // var response = {
-                //     users: _users,
-                //     code: mResponse.querySuccess.code,
-                //     message: mResponse.querySuccess.message
-                // }
-                res.send(200, _users);
             }
         })
     };

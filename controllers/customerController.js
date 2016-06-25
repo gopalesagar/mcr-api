@@ -1,5 +1,6 @@
 var crypto = require('crypto')
 var async = require('async')
+var jwt = require('jsonwebtoken')
 
 var updateOptions = {
 	new: true,
@@ -42,40 +43,48 @@ function CustomerController() {
         var address = req.body.address
         var city = req.body.city
         var zipcode = req.body.zipcode
+        var token = req.headers.token
 
-        async.waterfall([
-            //SAVING CUSTOMER HERE
-            function(callback) {
-                var customer = {
-                    companyName: companyName,
-                    contactName: contactName,
-                    contactTitle: contactTitle,
-                    phone: phone,
-                    address: address,
-                    city: city,
-                    zipcode: zipcode,
-                    status: status.active,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                }
+        jwt.verify(token, config.authentication.superSecret, function(error, user) {
+            if(error) {
+                log.e(tag + JSON.stringify(error))
+                res.send(mResponse.unauthorized.code, mResponse.unauthorized);
+            } else {
+                async.waterfall([
+                    //SAVING CUSTOMER HERE
+                    function(callback) {
+                        var customer = {
+                            companyName: companyName,
+                            contactName: contactName,
+                            contactTitle: contactTitle,
+                            phone: phone,
+                            address: address,
+                            city: city,
+                            zipcode: zipcode,
+                            status: status.active,
+                            createdAt: new Date(),
+                            updatedAt: new Date()
+                        }
 
-                customers.insert(customer, insertOptions, function(error, response) {
+                        customers.insert(customer, insertOptions, function(error, response) {
+                            if(error) {
+                                log.e(tag + 'Error inserting customer');
+                                callback(mResponse.internalServerError, null)
+                            } else {
+                                callback(null, customer)
+                            }
+                        })
+                    }
+                ], function(error, customer) {
                     if(error) {
-                        log.e(tag + 'Error inserting customer');
-                        callback(mResponse.internalServerError, null)
+                        log.e(tag + 'Error inserting customer final block');
+                        res.send(error.code, error);
                     } else {
-                        callback(null, customer)
+                        res.send(mResponse.saveSuccess.code, mResponse.saveSuccess);
                     }
                 })
             }
-        ], function(error, customer) {
-            if(error) {
-                log.e(tag + 'Error inserting customer final block');
-                res.send(error.code, error);
-            } else {
-                res.send(mResponse.saveSuccess.code, mResponse.saveSuccess);
-            }
-        })
+        });
     };
 
     this.list = function(req, res, next) {
@@ -85,37 +94,46 @@ function CustomerController() {
 
         var skipCount = req.query.skipCount ? parseInt(req.query.skipCount) : 0
         var limit = req.query.limit ? parseInt(req.query.limit) : 0
+        var token = req.headers.token
 
-        async.waterfall([
-            function(callback) {
-                //FIND CUSTOMERS HERE
-                var selector = {}
-                customers.find(selector).limit(limit).skip(skipCount).toArray(function(error, _customers) {
+        jwt.verify(token, config.authentication.superSecret, function(error, user) {
+            if(error) {
+                log.e(tag + JSON.stringify(error))
+                res.send(mResponse.unauthorized.code, mResponse.unauthorized);
+            } else {
+
+                async.waterfall([
+                    function(callback) {
+                        //FIND CUSTOMERS HERE
+                        var selector = {}
+                        customers.find(selector).limit(limit).skip(skipCount).toArray(function(error, _customers) {
+                            if(error) {
+                                log.e(tag + 'Error fetching customers');
+                                callback(mResponse.internalServerError, null)
+                            } else {
+                                if(_customers && _customers.length > 0) {
+                                    callback(null, _customers)
+                                } else {
+                                    callback(null, [])
+                                }
+                            }
+                        })
+                    }
+                ], function(error, _customers) {
                     if(error) {
-                        log.e(tag + 'Error fetching customers');
-                        callback(mResponse.internalServerError, null)
+                        log.e(tag + 'Error fetching customers final block');
+                        res.send(error.code, error);
                     } else {
-                        if(_customers && _customers.length > 0) {
-                            callback(_customers, null)
-                        } else {
-                            callback([], null)
-                        }
+                        //var response = {
+                        //     users: _customers,
+                        //     code: mResponse.querySuccess.code,
+                        //     message: mResponse.querySuccess.message
+                        // }
+                        res.send(200, _customers);
                     }
                 })
             }
-        ], function(error, _customers) {
-            if(error) {
-                log.e(tag + 'Error fetching customers final block');
-                res.send(error.code, error);
-            } else {
-                //var response = {
-                //     users: _customers,
-                //     code: mResponse.querySuccess.code,
-                //     message: mResponse.querySuccess.message
-                // }
-                res.send(200, _customers);
-            }
-        })
+        });
     };
     
     return this;
