@@ -7,8 +7,12 @@ var exports = {};
 
 var MongoClient = mongodb.MongoClient;
 
+var connectionString = process.env.MONGODB_URI || config.db.connectionString
+
+log.d('This is the connection string ' + connectionString);
+
 if(MongoClient) {
-	MongoClient.connect(process.env.MONGODB_URI, config.db.options, function(error, db) {
+	MongoClient.connect(connectionString, config.db.options, function(error, db) {
 		if(error) {
 			log.e(__filename + JSON.stringify(error));
 		} else {

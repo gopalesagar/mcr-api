@@ -84,6 +84,46 @@ function UserController() {
             }
         })
     };
+
+    this.list = function(req, res, next) {
+        const tag = 'USER GET: '
+        res.setHeader('Content-Type', 'application/json')
+        var users = db.collection(collection.users)
+
+        var skipCount = req.query.skipCount ? parseInt(req.query.skipCount) : 0
+        var limit = req.query.limit ? parseInt(req.query.limit) : 0
+
+        async.waterfall([
+            function(callback) {
+                //FIND USERS HERE
+                var selector = {}
+                users.find(selector).limit(limit).skip(skipCount).toArray(function(error, _users) {
+                    if(error) {
+                        log.e(tag + 'Error fetching user');
+                        callback(mResponse.internalServerError, null)
+                    } else {
+                        if(_users && _users.length > 0) {
+                            callback(null, _users)
+                        } else {
+                            callback(null, [])
+                        }
+                    }
+                })
+            }
+        ], function(error, _users) {
+            if(error) {
+                log.e(tag + 'Error fetching users final block');
+                res.send(error.code, error);
+            } else {
+                // var response = {
+                //     users: _users,
+                //     code: mResponse.querySuccess.code,
+                //     message: mResponse.querySuccess.message
+                // }
+                res.send(200, _users);
+            }
+        })
+    };
     return this;
 };
 

@@ -3,6 +3,10 @@
         "code": 200,
         "message": "Resource saved succesfully!"
     },
+    "querySuccess": {
+        "code": 200,
+        "message": "Resource fetched succesfully!"
+    },
     "unauthorized": {
         "code": 401,
         "message": "Unauthorized!"

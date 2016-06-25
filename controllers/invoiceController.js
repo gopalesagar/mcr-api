@@ -93,6 +93,46 @@ function InvoiceController() {
         })
     };
 
+    this.list = function(req, res, next) {
+        const tag = 'USER GET: '
+        res.setHeader('Content-Type', 'application/json')
+        var invoices = db.collection(collection.invoices)
+
+        var skipCount = req.query.skipCount ? parseInt(req.query.skipCount) : 0
+        var limit = req.query.limit ? parseInt(req.query.limit) : 0
+
+        async.waterfall([
+            function(callback) {
+                //FIND INVOICES HERE
+                var selector = {}
+                invoices.find(selector).limit(limit).skip(skipCount).toArray(function(error, _invoices) {
+                    if(error) {
+                        log.e(tag + 'Error fetching invoices');
+                        callback(mResponse.internalServerError, null)
+                    } else {
+                        if(_invoices && _invoices.length > 0) {
+                            callback(null, _invoices)
+                        } else {
+                            callback(null, [])
+                        }
+                    }
+                })
+            }
+        ], function(error, _invoices) {
+            if(error) {
+                log.e(tag + 'Error fetching invoices final block');
+                res.send(error.code, error);
+            } else {
+                var response = {
+                    users: _invoices,
+                    code: mResponse.querySuccess.code,
+                    message: mResponse.querySuccess.message
+                }
+                res.send(200, _invoices);
+            }
+        })
+    };
+
     return this;
 };
 
